@@ -68,7 +68,7 @@ function App() {
             </div>
 
             <div className="absolute bottom-8 right-8 pointer-events-none z-10 text-right opacity-40">
-              <p className="text-[10px] uppercase tracking-[0.2em] font-mono text-orange-500">SCIENTER-OS v1.4.0</p>
+              <p className="text-[10px] uppercase tracking-[0.2em] font-mono text-orange-500">SCIENTER-OS v1.5.0</p>
               <p className="text-[10px] uppercase tracking-[0.2em] font-mono text-white/60">SYSTEMS READY</p>
             </div>
           </main>
