@@ -6,6 +6,7 @@ import DayNight from "@/components/visualizations/DayNight";
 import Gravity from "@/components/visualizations/Gravity";
 import ThreeBodyProblem from "@/components/visualizations/ThreeBodyProblem";
 import Mandelbrot from "@/components/visualizations/Mandelbrot";
+import Doppler from "@/components/visualizations/Doppler";
 import { AnimatePresence, motion } from "framer-motion";
 
 function App() {
@@ -18,6 +19,7 @@ function App() {
       case 'gravity': return 'SINGULARITY';
       case 'three-body': return 'THREE BODY PROBLEM';
       case 'chaos': return 'CHAOS THEORY';
+      case 'doppler': return 'DOPPLER EFFECT';
       default: return 'SCIENTERRIFIC';
     }
   };
@@ -27,6 +29,7 @@ function App() {
       case 'gravity': return 'THEORETICAL MODEL';
       case 'three-body': return 'CHAOTIC ORBITAL DYNAMICS';
       case 'chaos': return 'MANDELBROT SET EXPLORATION';
+      case 'doppler': return 'ACOUSTIC COMPRESSION ANALYSIS';
       default: return 'VISUALIZATION ACTIVE';
     }
   };
@@ -52,6 +55,7 @@ function App() {
                 {currentView === 'gravity' && <Gravity />}
                 {currentView === 'three-body' && <ThreeBodyProblem />}
                 {currentView === 'chaos' && <Mandelbrot />}
+                {currentView === 'doppler' && <Doppler />}
               </motion.div>
             </AnimatePresence>
 
@@ -68,7 +72,7 @@ function App() {
             </div>
 
             <div className="absolute bottom-8 right-8 pointer-events-none z-10 text-right opacity-40">
-              <p className="text-[10px] uppercase tracking-[0.2em] font-mono text-orange-500">SCIENTER-OS v1.5.0</p>
+              <p className="text-[10px] uppercase tracking-[0.2em] font-mono text-orange-500">SCIENTER-OS v1.5.1</p>
               <p className="text-[10px] uppercase tracking-[0.2em] font-mono text-white/60">SYSTEMS READY</p>
             </div>
           </main>

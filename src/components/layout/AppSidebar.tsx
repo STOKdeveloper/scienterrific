@@ -9,7 +9,7 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { Orbit, SunMoon, Atom, Binary, Sigma } from "lucide-react";
+import { Orbit, SunMoon, Atom, Binary, Sigma, Activity } from "lucide-react";
 
 interface AppSidebarProps {
     currentView: string;
@@ -40,6 +40,11 @@ export function AppSidebar({ currentView, setCurrentView }: AppSidebarProps) {
             title: "Three Body Problem",
             id: "three-body",
             icon: Binary,
+        },
+        {
+            title: "Doppler Effect",
+            id: "doppler",
+            icon: Activity,
         },
     ];
 
