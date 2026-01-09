@@ -7,6 +7,7 @@ import Gravity from "@/components/visualizations/Gravity";
 import ThreeBodyProblem from "@/components/visualizations/ThreeBodyProblem";
 import Mandelbrot from "@/components/visualizations/Mandelbrot";
 import Doppler from "@/components/visualizations/Doppler";
+import PlateTectonics from "@/components/visualizations/PlateTectonics";
 import { AnimatePresence, motion } from "framer-motion";
 
 function App() {
@@ -20,6 +21,7 @@ function App() {
       case 'three-body': return 'THREE BODY PROBLEM';
       case 'chaos': return 'CHAOS THEORY';
       case 'doppler': return 'DOPPLER EFFECT';
+      case 'plate-tectonics': return 'PLATE TECTONICS';
       default: return 'SCIENTERRIFIC';
     }
   };
@@ -30,6 +32,7 @@ function App() {
       case 'three-body': return 'CHAOTIC ORBITAL DYNAMICS';
       case 'chaos': return 'MANDELBROT SET EXPLORATION';
       case 'doppler': return 'ACOUSTIC COMPRESSION ANALYSIS';
+      case 'plate-tectonics': return 'LITHOSPHERIC INTERACTION ANALYSIS';
       default: return 'VISUALIZATION ACTIVE';
     }
   };
@@ -56,6 +59,7 @@ function App() {
                 {currentView === 'three-body' && <ThreeBodyProblem />}
                 {currentView === 'chaos' && <Mandelbrot />}
                 {currentView === 'doppler' && <Doppler />}
+                {currentView === 'plate-tectonics' && <PlateTectonics />}
               </motion.div>
             </AnimatePresence>
 
