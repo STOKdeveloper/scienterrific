@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Droplet, Cloud, Sun, ArrowDown, ArrowUp, ArrowRight } from 'lucide-react';
 
@@ -9,12 +9,12 @@ const Particle = ({ type }: { type: 'vapor' | 'rain' }) => {
             initial={{
                 opacity: 0,
                 y: isVapor ? 400 : 150,
-                x: isVapor ? 100 + Math.random() * 200 : 500 + Math.random() * 200
+                x: isVapor ? 50 + Math.random() * 300 : 500 + Math.random() * 200
             }}
             animate={{
                 opacity: [0, 1, 0],
                 y: isVapor ? 150 : 400,
-                x: isVapor ? '+=20' : '-=10'
+                x: isVapor ? '+=30' : '-=10'
             }}
             transition={{
                 duration: isVapor ? 4 + Math.random() * 2 : 2 + Math.random() * 1,
@@ -23,6 +23,32 @@ const Particle = ({ type }: { type: 'vapor' | 'rain' }) => {
                 delay: Math.random() * 5
             }}
             className={`absolute w-1 h-1 rounded-full ${isVapor ? 'bg-blue-300/40 blur-[1px]' : 'bg-blue-500'}`}
+        />
+    );
+};
+
+const SteamWisp = ({ index }: { index: number }) => {
+    const randomX = useMemo(() => 50 + Math.random() * 350, []);
+    const randomDelay = useMemo(() => Math.random() * 4, []);
+    const randomDuration = useMemo(() => 5 + Math.random() * 3, []);
+    const randomScale = useMemo(() => 0.5 + Math.random() * 1.5, []);
+
+    return (
+        <motion.div
+            initial={{ opacity: 0, scale: 0.5 * randomScale, y: 410, x: randomX, filter: 'blur(8px)' }}
+            animate={{
+                opacity: [0, 0.4, 0],
+                y: [410, 300, 180],
+                x: [randomX, randomX + 40, randomX + 80],
+                scale: [0.5 * randomScale, 2 * randomScale, 3 * randomScale]
+            }}
+            transition={{
+                duration: randomDuration,
+                repeat: Infinity,
+                ease: "easeOut",
+                delay: randomDelay
+            }}
+            className="absolute w-12 h-12 bg-white/20 rounded-full pointer-events-none"
         />
     );
 };
@@ -79,7 +105,37 @@ const WaterCycle = () => {
 
                     {/* Snow Caps */}
                     <path d="M 600 150 L 560 200 Q 600 180 640 200 Z" fill="white" opacity="0.6" />
+
+                    {/* River Runoff */}
+                    <motion.path
+                        d="M 600 250 Q 550 350 400 400"
+                        fill="none"
+                        stroke="#0ea5e9"
+                        strokeWidth="4"
+                        strokeDasharray="10 5"
+                        animate={{ strokeDashoffset: [0, -30] }}
+                        transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                        className="opacity-30"
+                    />
                 </svg>
+
+                {/* Steam Effect (Evaporation Stage Focused) */}
+                <div className="absolute inset-0 pointer-events-none">
+                    <AnimatePresence>
+                        {activeStage === 'evaporation' && (
+                            <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                className="absolute inset-0"
+                            >
+                                {Array.from({ length: 15 }).map((_, i) => (
+                                    <SteamWisp key={`steam-${i}`} index={i} />
+                                ))}
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                </div>
 
                 {/* Sun */}
                 <motion.div
@@ -110,64 +166,64 @@ const WaterCycle = () => {
                 {Array.from({ length: 20 }).map((_, i) => <Particle key={`v-${i}`} type="vapor" />)}
                 {Array.from({ length: 20 }).map((_, i) => <Particle key={`r-${i}`} type="rain" />)}
 
-                {/* River Runoff */}
-                <motion.path
-                    d="M 600 250 Q 550 350 400 400"
-                    fill="none"
-                    stroke="#0ea5e9"
-                    strokeWidth="4"
-                    strokeDasharray="10 5"
-                    animate={{ strokeDashoffset: [0, -30] }}
-                    transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                    className="opacity-30"
-                />
-
                 {/* Info HUD */}
                 <div className="absolute top-12 right-12 text-right">
                     <p className="text-[10px] text-orange-500 uppercase tracking-[0.5em] font-black mb-1">Atmospheric Study</p>
                     <h2 className="text-4xl font-black text-white italic tracking-tighter uppercase leading-none">The Hydrologic Cycle</h2>
                 </div>
 
-                <div className="absolute bottom-12 left-12 right-12 flex justify-between gap-6">
-                    <div className="flex-1 bg-zinc-950/80 backdrop-blur-xl border border-white/5 p-8 rounded-3xl shadow-2xl h-[200px] flex flex-col justify-center">
+                {/* Dynamic Info Explanation Box */}
+                <motion.div
+                    layout
+                    initial={false}
+                    animate={
+                        activeStage === 'evaporation' ? { top: 'auto', bottom: '48px', left: 'auto', right: '48px', x: 0, y: 0 } :
+                            activeStage === 'condensation' ? { top: 'auto', bottom: '48px', left: '48px', right: 'auto', x: 0, y: 0 } :
+                                activeStage === 'precipitation' ? { top: '128px', bottom: 'auto', left: '48px', right: 'auto', x: 0, y: 0 } :
+                                    { top: '128px', bottom: 'auto', left: '250px', right: 'auto', x: 0, y: 0 } // collection
+                    }
+                    transition={{ type: "spring", stiffness: 100, damping: 20 }}
+                    className="absolute max-w-xs flex flex-col gap-4 z-50 pointer-events-none"
+                >
+                    <div className="bg-zinc-950/90 backdrop-blur-2xl border border-white/10 p-6 rounded-[2rem] shadow-2xl pointer-events-auto">
                         <AnimatePresence mode="wait">
                             <motion.div
                                 key={activeStage}
-                                initial={{ opacity: 0, y: 10, filter: "blur(4px)" }}
-                                animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-                                exit={{ opacity: 0, y: -10, filter: "blur(4px)" }}
+                                initial={{ opacity: 0, scale: 0.95, filter: "blur(4px)" }}
+                                animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+                                exit={{ opacity: 0, scale: 1.05, filter: "blur(4px)" }}
                                 transition={{ duration: 0.3 }}
                             >
-                                <div className="flex items-center gap-4 mb-4">
-                                    <div className={`p-2 rounded-lg bg-white/5 ${stages[activeStage].color}`}>
+                                <div className="flex items-center gap-3 mb-3">
+                                    <div className={`p-2.5 rounded-xl bg-white/5 ${stages[activeStage].color}`}>
                                         {React.createElement(stages[activeStage].icon, { size: 20 })}
                                     </div>
                                     <h3 className="text-xl font-black uppercase tracking-tight text-white italic">
                                         {stages[activeStage].title}
                                     </h3>
                                 </div>
-                                <p className="text-sm text-zinc-400 leading-relaxed font-semibold opacity-80 max-w-lg">
+                                <p className="text-xs text-zinc-400 leading-relaxed font-bold opacity-90">
                                     {stages[activeStage].desc}
                                 </p>
                             </motion.div>
                         </AnimatePresence>
                     </div>
 
-                    <div className="flex flex-col gap-2">
+                    <div className="flex flex-wrap gap-2 pointer-events-auto">
                         {Object.keys(stages).map((key) => (
                             <button
                                 key={key}
                                 onClick={() => setActiveStage(key as any)}
-                                className={`px-6 py-3 rounded-xl text-[9px] font-black uppercase tracking-[0.3em] transition-all border ${activeStage === key
-                                        ? 'bg-orange-500 text-black border-orange-500 shadow-[0_0_20px_rgba(249,115,22,0.3)]'
-                                        : 'bg-zinc-900/50 text-white/40 border-white/5 hover:border-white/20'
+                                className={`px-4 py-2 rounded-xl text-[8px] font-black uppercase tracking-[0.2em] transition-all border ${activeStage === key
+                                    ? 'bg-orange-500 text-black border-orange-500 shadow-[0_0_25px_rgba(249,115,22,0.4)]'
+                                    : 'bg-zinc-900/80 text-white/40 border-white/5 hover:border-white/20'
                                     }`}
                             >
                                 {key}
                             </button>
                         ))}
                     </div>
-                </div>
+                </motion.div>
             </div>
 
             {/* Aesthetic Border Elements */}

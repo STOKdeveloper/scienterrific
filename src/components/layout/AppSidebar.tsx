@@ -9,7 +9,7 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { Orbit, SunMoon, Atom, Binary, Sigma, Activity, Mountain } from "lucide-react";
+import { Orbit, SunMoon, Atom, Binary, Sigma, Activity, Mountain, Wifi } from "lucide-react";
 
 interface AppSidebarProps {
     currentView: string;
@@ -44,7 +44,7 @@ export function AppSidebar({ currentView, setCurrentView }: AppSidebarProps) {
         {
             title: "Doppler Effect",
             id: "doppler",
-            icon: Activity,
+            icon: Wifi,
         },
     ];
 
@@ -58,6 +58,11 @@ export function AppSidebar({ currentView, setCurrentView }: AppSidebarProps) {
 
     const natureItems = [
         {
+            title: "Water Cycle",
+            id: "water-cycle",
+            icon: SunMoon,
+        },
+        {
             title: "Plate Tectonics",
             id: "plate-tectonics",
             icon: Mountain,
@@ -66,11 +71,6 @@ export function AppSidebar({ currentView, setCurrentView }: AppSidebarProps) {
             title: "Volcano",
             id: "volcano",
             icon: Activity,
-        },
-        {
-            title: "Water Cycle",
-            id: "water-cycle",
-            icon: SunMoon,
         },
     ];
 
