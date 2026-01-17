@@ -8,6 +8,8 @@ import ThreeBodyProblem from "@/components/visualizations/ThreeBodyProblem";
 import Mandelbrot from "@/components/visualizations/Mandelbrot";
 import Doppler from "@/components/visualizations/Doppler";
 import PlateTectonics from "@/components/visualizations/PlateTectonics";
+import Volcano from "@/components/visualizations/Volcano";
+import WaterCycle from "@/components/visualizations/WaterCycle";
 import { AnimatePresence, motion } from "framer-motion";
 import pkg from '../package.json';
 
@@ -23,6 +25,8 @@ function App() {
       case 'chaos': return 'CHAOS THEORY';
       case 'doppler': return 'DOPPLER EFFECT';
       case 'plate-tectonics': return 'PLATE TECTONICS';
+      case 'volcano': return 'VOLCANIC ACTIVITY';
+      case 'water-cycle': return 'THE WATER CYCLE';
       default: return 'SCIENTERRIFIC';
     }
   };
@@ -34,6 +38,8 @@ function App() {
       case 'chaos': return 'MANDELBROT SET EXPLORATION';
       case 'doppler': return 'ACOUSTIC COMPRESSION ANALYSIS';
       case 'plate-tectonics': return 'LITHOSPHERIC INTERACTION ANALYSIS';
+      case 'volcano': return 'MAGMA PRESSURE MONITORING';
+      case 'water-cycle': return 'HYDROLOGIC FLOW ANALYSIS';
       default: return 'VISUALIZATION ACTIVE';
     }
   };
@@ -61,6 +67,8 @@ function App() {
                 {currentView === 'chaos' && <Mandelbrot />}
                 {currentView === 'doppler' && <Doppler />}
                 {currentView === 'plate-tectonics' && <PlateTectonics />}
+                {currentView === 'volcano' && <Volcano />}
+                {currentView === 'water-cycle' && <WaterCycle />}
               </motion.div>
             </AnimatePresence>
 

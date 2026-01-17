@@ -8,9 +8,11 @@ An interactive scientific visualization platform built with React, Three.js, and
 - **Earth: Day & Night**: Visualization of Earth's rotation and light/shadow dynamics.
 - **Singularity**: Theoretical model of gravitational singularities.
 - **Three Body Problem**: Analysis of chaotic orbital dynamics.
-- **Chaos Theory**: Mandelbrot set exploration.
+- **Chaos Theory**: Mandelbrot set exploration with box-selection zoom.
 - **Doppler Effect**: Acoustic compression and wave analysis.
-- **Plate Tectonics**: Lithospheric interaction analysis.
+- **Plate Tectonics**: Lithospheric interaction analysis of divergent, convergent, and transform boundaries.
+- **Volcanic Activity**: 3D simulation of magma buildup and interactive eruptions.
+- **The Water Cycle**: Detailed hydrologic flow analysis from evaporation to collection.
 
 ## 🛠️ Tech Stack
 

@@ -62,6 +62,16 @@ export function AppSidebar({ currentView, setCurrentView }: AppSidebarProps) {
             id: "plate-tectonics",
             icon: Mountain,
         },
+        {
+            title: "Volcano",
+            id: "volcano",
+            icon: Activity,
+        },
+        {
+            title: "Water Cycle",
+            id: "water-cycle",
+            icon: SunMoon,
+        },
     ];
 
     return (
@@ -188,7 +198,7 @@ export function AppSidebar({ currentView, setCurrentView }: AppSidebarProps) {
                         <Atom className="h-4 w-4 text-orange-500 animate-spin-slow" />
                         <div className="absolute inset-0 blur-md bg-orange-500/50 animate-pulse" />
                     </div>
-                    <span className="text-[10px] uppercase tracking-[0.3em] text-orange-500/60 font-bold">Explorer OS</span>
+                    <span className="text-[10px] uppercase tracking-[0.3em] text-orange-500/60 font-bold">Scienter OS</span>
                 </div>
             </div>
         </Sidebar>
