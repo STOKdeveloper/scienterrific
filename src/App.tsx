@@ -9,6 +9,7 @@ import Mandelbrot from "@/components/visualizations/Mandelbrot";
 import Doppler from "@/components/visualizations/Doppler";
 import PlateTectonics from "@/components/visualizations/PlateTectonics";
 import { AnimatePresence, motion } from "framer-motion";
+import pkg from '../package.json';
 
 function App() {
   const [currentView, setCurrentView] = useState('solar-system');
@@ -76,7 +77,7 @@ function App() {
             </div>
 
             <div className="absolute bottom-8 right-8 pointer-events-none z-10 text-right opacity-40">
-              <p className="text-[10px] uppercase tracking-[0.2em] font-mono text-orange-500">SCIENTER-OS v1.5.1</p>
+              <p className="text-[10px] uppercase tracking-[0.2em] font-mono text-orange-500">SCIENTER-OS v{pkg.version}</p>
               <p className="text-[10px] uppercase tracking-[0.2em] font-mono text-white/60">SYSTEMS READY</p>
             </div>
           </main>

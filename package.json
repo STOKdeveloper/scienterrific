@@ -1,6 +1,6 @@
 {
   "name": "scienterrific",
-  "version": "1.7.0",
+  "version": "1.7.1",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build"

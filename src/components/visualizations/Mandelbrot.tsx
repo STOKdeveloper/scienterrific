@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react';
-import { RotateCcw, ZoomIn, Maximize2, MousePointerClick } from 'lucide-react';
+import { RotateCcw, ZoomIn, Maximize2, MousePointerClick, SquareDashed } from 'lucide-react';
 
 const Mandelbrot = () => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -10,6 +10,9 @@ const Mandelbrot = () => {
     });
     const [maxIterations, setMaxIterations] = useState(100);
     const [isZooming, setIsZooming] = useState(false);
+    const [isSelecting, setIsSelecting] = useState(false);
+    const [selectionStart, setSelectionStart] = useState({ x: 0, y: 0 });
+    const [selectionEnd, setSelectionEnd] = useState({ x: 0, y: 0 });
     const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
 
     // Zoom speed per frame (1.05 = 5% increase)
@@ -37,8 +40,6 @@ const Mandelbrot = () => {
                 let y = 0;
                 let iteration = 0;
 
-                // Optimization: use x*x + y*y precalculated if needed, 
-                // but basic loop is clearer for science visualization
                 while (x * x + y * y <= 4 && iteration < maxIterations) {
                     const xTemp = x * x - y * y + x0;
                     y = 2 * x * y + y0;
@@ -53,7 +54,6 @@ const Mandelbrot = () => {
                     data[pixelIndex + 2] = 0;
                 } else {
                     const t = iteration / maxIterations;
-                    // Science aesthetic: Blues to Oranges
                     data[pixelIndex] = Math.min(255, t * 500);
                     data[pixelIndex + 1] = Math.min(255, t * 200);
                     data[pixelIndex + 2] = Math.min(255, (1 - t) * 150);
@@ -79,14 +79,12 @@ const Mandelbrot = () => {
                 const height = canvas.height;
                 const zoomScale = 4 / (prev.zoom * Math.min(width, height));
 
-                // Point in complex plane currently under mouse
                 const targetX = (mousePos.x - width / 2) * zoomScale + prev.x;
                 const targetY = (mousePos.y - height / 2) * zoomScale + prev.y;
 
                 const newZoom = prev.zoom * ZOOM_SPEED;
                 const newZoomScale = 4 / (newZoom * Math.min(width, height));
 
-                // Re-calculate center so target point stays under mouse
                 const newX = targetX - (mousePos.x - width / 2) * newZoomScale;
                 const newY = targetY - (mousePos.y - height / 2) * newZoomScale;
 
@@ -97,10 +95,9 @@ const Mandelbrot = () => {
                 };
             });
 
-            // Gradually increase iterations as we zoom in
             setMaxIterations(prev => {
                 const zoomLog = Math.log10(view.zoom);
-                return Math.min(1000, 100 + Math.floor(zoomLog * 50));
+                return Math.min(1000, 100 + Math.floor(zoomLog * 150));
             });
 
             animationFrameId = requestAnimationFrame(performZoom);
@@ -126,24 +123,83 @@ const Mandelbrot = () => {
 
     const handlePointerDown = (e: React.PointerEvent<HTMLCanvasElement>) => {
         const rect = canvasRef.current!.getBoundingClientRect();
-        setMousePos({
-            x: e.clientX - rect.left,
-            y: e.clientY - rect.top
-        });
-        setIsZooming(true);
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+
+        setMousePos({ x, y });
+        setSelectionStart({ x, y });
+        setSelectionEnd({ x, y });
+
+        // Start potential selection, but delay the continuous zoom
+        setIsSelecting(true);
+        const timer = setTimeout(() => {
+            if (!isSelecting) return;
+            // Only start zooming if the pointer hasn't moved much (not a drag)
+            const dist = Math.sqrt(Math.pow(selectionEnd.x - x, 2) + Math.pow(selectionEnd.y - y, 2));
+            if (dist < 10) {
+                setIsZooming(true);
+            }
+        }, 150);
+
+        return () => clearTimeout(timer);
     };
 
     const handlePointerMove = (e: React.PointerEvent<HTMLCanvasElement>) => {
-        if (!isZooming) return;
         const rect = canvasRef.current!.getBoundingClientRect();
-        setMousePos({
-            x: e.clientX - rect.left,
-            y: e.clientY - rect.top
-        });
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+
+        setMousePos({ x, y });
+        if (isSelecting) {
+            setSelectionEnd({ x, y });
+            // If dragging significantly, cancel the continuous zoom
+            const dist = Math.sqrt(Math.pow(x - selectionStart.x, 2) + Math.pow(y - selectionStart.y, 2));
+            if (dist > 10) {
+                setIsZooming(false);
+            }
+        }
     };
 
     const handlePointerUp = () => {
+        if (isSelecting && !isZooming) {
+            // Check if we have a significant selection area
+            const dx = Math.abs(selectionEnd.x - selectionStart.x);
+            const dy = Math.abs(selectionEnd.y - selectionStart.y);
+
+            if (dx > 5 && dy > 5) {
+                const canvas = canvasRef.current;
+                if (canvas) {
+                    const width = canvas.width;
+                    const height = canvas.height;
+                    const zoomScale = 4 / (view.zoom * Math.min(width, height));
+
+                    // Current center in complex plane
+                    const centerX = (selectionStart.x + selectionEnd.x) / 2;
+                    const centerY = (selectionStart.y + selectionEnd.y) / 2;
+
+                    const newComplexX = (centerX - width / 2) * zoomScale + view.x;
+                    const newComplexY = (centerY - height / 2) * zoomScale + view.y;
+
+                    // Calculate new zoom based on box size relative to canvas
+                    const zoomFactor = Math.min(width / dx, height / dy);
+                    const newZoom = view.zoom * zoomFactor;
+
+                    setView({
+                        x: newComplexX,
+                        y: newComplexY,
+                        zoom: newZoom
+                    });
+
+                    setMaxIterations(prev => {
+                        const zoomLog = Math.log10(newZoom);
+                        return Math.min(1000, 100 + Math.floor(zoomLog * 150));
+                    });
+                }
+            }
+        }
+
         setIsZooming(false);
+        setIsSelecting(false);
     };
 
     const resetView = () => {
@@ -170,12 +226,28 @@ const Mandelbrot = () => {
                 className="cursor-crosshair shadow-2xl touch-none"
             />
 
+            {/* Selection Box Overlay */}
+            {isSelecting && !isZooming && (
+                <div
+                    className="absolute border border-orange-500 bg-orange-500/10 pointer-events-none z-30"
+                    style={{
+                        left: Math.min(selectionStart.x, selectionEnd.x) + (canvasRef.current?.offsetLeft || 0),
+                        top: Math.min(selectionStart.y, selectionEnd.y) + (canvasRef.current?.offsetTop || 0),
+                        width: Math.abs(selectionEnd.x - selectionStart.x),
+                        height: Math.abs(selectionEnd.y - selectionStart.y)
+                    }}
+                />
+            )}
+
             {/* Instruction Banner */}
-            {!isZooming && view.zoom === 1 && (
+            {!isSelecting && view.zoom === 1 && (
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 px-8 py-4 bg-orange-500/10 border border-orange-500/20 rounded-full backdrop-blur-xl pointer-events-none animate-bounce">
                     <div className="flex items-center gap-3">
+                        <SquareDashed size={16} className="text-orange-500" />
+                        <span className="text-[10px] font-black text-white tracking-[0.2em] uppercase">Drag to zoom area</span>
+                        <div className="w-1 h-1 rounded-full bg-orange-500/40" />
                         <MousePointerClick size={16} className="text-orange-500" />
-                        <span className="text-[10px] font-black text-white tracking-[0.2em] uppercase">Hold to dive into chaos</span>
+                        <span className="text-[10px] font-black text-white tracking-[0.2em] uppercase">Hold to dive</span>
                     </div>
                 </div>
             )}
@@ -206,7 +278,7 @@ const Mandelbrot = () => {
                 </div>
                 <div className="mt-6 pt-4 border-t border-orange-500/10">
                     <p className="text-[8px] text-zinc-500 uppercase leading-relaxed font-bold">
-                        Hold Mouse1 to continuously converge. Center of mass shifts toward pointer.
+                        Drag to zoom into a specific region. Hold Mouse1 to continuously converge.
                     </p>
                 </div>
             </div>
