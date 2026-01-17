@@ -36,7 +36,9 @@ const Doppler: React.FC = () => {
         const centerX = width / 2;
         const duration = 5; // seconds
         const normT = (t % duration) / duration;
-        const xRange = width * 1.2;
+
+        // Contrain range to 85% of width to prevent going off-screen on tablets
+        const xRange = width * 0.85;
 
         let obsX = centerX;
         let srcX = centerX;
@@ -313,61 +315,63 @@ const Doppler: React.FC = () => {
                     className="w-full h-full"
                 />
 
-                {/* Controls Overlay */}
-                <div className="absolute top-6 right-6 flex flex-col gap-3">
-                    <div className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-xl p-2 flex flex-col gap-2">
-                        {scenarios.map((s) => (
-                            <button
-                                key={s.id}
-                                onClick={() => handleScenarioChange(s.id)}
-                                className={`
-                  px-4 py-2 rounded-lg text-xs font-bold transition-all duration-300 flex items-center gap-2
-                  ${activeScenario === s.id
-                                        ? 'bg-orange-500 text-white shadow-[0_0_15px_rgba(249,115,22,0.3)]'
-                                        : 'text-white/40 hover:text-white/90 hover:bg-white/5'}
-                `}
-                            >
-                                {s.id === 'fixed-observer' && <User className="h-3 w-3" />}
-                                {s.id === 'moving-observer' && <Activity className="h-3 w-3 animate-pulse" />}
-                                {s.id === 'moving-both' && <Radio className="h-3 w-3" />}
-                                {s.title}
-                            </button>
-                        ))}
-                    </div>
+                {/* Responsive Controls Overlay */}
+                <div className="absolute top-6 right-6 lg:top-8 lg:right-8 flex flex-col gap-3 min-w-[200px] max-w-[calc(100%-48px)]">
+                    <div className="bg-black/60 backdrop-blur-2xl border border-white/10 rounded-2xl p-3 flex flex-col gap-2 shadow-2xl">
+                        <div className="flex flex-col gap-1.5">
+                            {scenarios.map((s) => (
+                                <button
+                                    key={s.id}
+                                    onClick={() => handleScenarioChange(s.id)}
+                                    className={`
+                                        px-4 py-2.5 rounded-xl text-[10px] lg:text-xs font-black transition-all duration-300 flex items-center gap-3 uppercase tracking-wider
+                                        ${activeScenario === s.id
+                                            ? 'bg-orange-500 text-white shadow-[0_0_20px_rgba(249,115,22,0.4)]'
+                                            : 'text-white/40 hover:text-white/90 hover:bg-white/5'}
+                                    `}
+                                >
+                                    {s.id === 'fixed-observer' && <User className="h-3.5 w-3.5" />}
+                                    {s.id === 'moving-observer' && <Activity className="h-3.5 w-3.5" />}
+                                    {s.id === 'moving-both' && <Radio className="h-3.5 w-3.5" />}
+                                    {s.title}
+                                </button>
+                            ))}
+                        </div>
 
-                    <button
-                        onClick={togglePlay}
-                        className={`
-              w-full py-3 rounded-xl flex items-center justify-center gap-3 font-black tracking-tighter transition-all duration-500 text-xs
-              ${isPlaying
-                                ? 'bg-red-500/10 text-red-500 border border-red-500/20 shadow-[0_0_30px_rgba(239,68,68,0.1)]'
-                                : 'bg-blue-600 text-white shadow-[0_0_30px_rgba(37,99,235,0.2)] hover:scale-[1.02] hover:bg-blue-500'}
-            `}
-                    >
-                        {isPlaying ? (
-                            <>
-                                <RotateCcw className="h-4 w-4" />
-                                STOP SIMULATION
-                            </>
-                        ) : (
-                            <>
-                                <Play className="h-4 w-4 fill-current" />
-                                START ACOUSTIC TEST
-                            </>
-                        )}
-                    </button>
+                        <button
+                            onClick={togglePlay}
+                            className={`
+                                mt-2 w-full py-4 rounded-xl flex items-center justify-center gap-3 font-black tracking-widest transition-all duration-500 text-[10px] uppercase
+                                ${isPlaying
+                                    ? 'bg-red-500/20 text-red-500 border border-red-500/20 shadow-[0_0_30px_rgba(239,68,68,0.2)]'
+                                    : 'bg-blue-600 text-white shadow-[0_0_30px_rgba(37,99,235,0.3)] hover:scale-[1.02] hover:bg-blue-500'}
+                            `}
+                        >
+                            {isPlaying ? (
+                                <>
+                                    <RotateCcw className="h-4 w-4" />
+                                    RESET TEST
+                                </>
+                            ) : (
+                                <>
+                                    <Play className="h-4 w-4 fill-current" />
+                                    INITIATE SEQUENCE
+                                </>
+                            )}
+                        </button>
+                    </div>
                 </div>
 
-                {/* Legend */}
-                <div className="absolute bottom-6 left-6 p-4 bg-black/40 backdrop-blur-xl border border-white/10 rounded-xl">
-                    <div className="flex flex-col gap-2">
+                {/* Legend - Responsive positioning */}
+                <div className="absolute bottom-6 left-6 p-4 bg-black/60 backdrop-blur-xl border border-white/10 rounded-2xl hidden md:block">
+                    <div className="flex flex-col gap-2.5">
                         <div className="flex items-center gap-3">
-                            <div className="w-3 h-3 rounded-full bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)]" />
-                            <span className="text-[10px] uppercase tracking-widest text-white/60 font-bold">Sound Source (220Hz Base)</span>
+                            <div className="w-2.5 h-2.5 rounded-full bg-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.6)]" />
+                            <span className="text-[9px] uppercase tracking-[0.2em] text-white/60 font-black">Sound Source</span>
                         </div>
                         <div className="flex items-center gap-3">
-                            <div className="w-3 h-3 rounded-full bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.5)]" />
-                            <span className="text-[10px] uppercase tracking-widest text-white/60 font-bold">Observer (Listener)</span>
+                            <div className="w-2.5 h-2.5 rounded-full bg-red-500 shadow-[0_0_15px_rgba(239,68,68,0.6)]" />
+                            <span className="text-[9px] uppercase tracking-[0.2em] text-white/60 font-black">Observer</span>
                         </div>
                     </div>
                 </div>
@@ -393,7 +397,7 @@ const Doppler: React.FC = () => {
                     </p>
                 </div>
             </div>
-        </div>
+        </div >
     );
 };
 

@@ -19,8 +19,8 @@ const LavaStream = ({ active, rotationY = 0, speed = 1 }: { active: boolean; rot
 
     return (
         <group rotation={[0, rotationY, 0]}>
-            <mesh ref={meshRef} position={[0, 1.8, 2.5]} rotation={[-Math.PI / 6, 0, 0]}>
-                <cylinderGeometry args={[0.2, 0.5, 4.5, 8]} />
+            <mesh ref={meshRef} position={[0, 3.8, 1]} rotation={[-Math.PI / 3, 0, 0]}>
+                <cylinderGeometry args={[0.2, 0.5, 5, 8]} />
                 <meshStandardMaterial
                     color="#ff3300"
                     emissive="#ff0000"
@@ -72,7 +72,7 @@ const LavaParticles = ({ count = 200, active = false }: { count?: number; active
     });
 
     return (
-        <points ref={ref} position={[0, 4, 0]}>
+        <points ref={ref} position={[0, 0, 0]}>
             <bufferGeometry>
                 <bufferAttribute
                     attach="attributes-position"
@@ -219,7 +219,7 @@ const Simulation = ({ onPressureChange }: { onPressureChange: (p: number, e: boo
                         <meshStandardMaterial color="#ff4400" emissive="#ff1100" emissiveIntensity={20} />
                     </mesh>
                     <LavaParticles count={500} active={true} />
-                    <pointLight intensity={2500} color="#ff3300" distance={40} position={[0, 3, 0]} />
+                    <pointLight intensity={2500} color="#ff3300" distance={40} position={[0, 1, 0]} />
                 </group>
             )}
 
@@ -271,44 +271,48 @@ const Volcano = () => {
     const [uiState, setUiState] = useState({ pressure: 0, isErupting: false });
 
     return (
-        <div className="w-full h-full bg-[#030305] relative cursor-crosshair overflow-hidden text-sans">
-            <Canvas shadows dpr={[1, 2]}>
-                <PerspectiveCamera makeDefault position={[12, 10, 15]} fov={40} />
-                <OrbitControls
-                    enablePan={false}
-                    maxPolarAngle={Math.PI / 2.1}
-                    minDistance={10}
-                    maxDistance={40}
-                />
+        <div className="w-full h-full min-h-[500px] flex flex-col bg-[#030305] relative cursor-crosshair overflow-hidden text-sans">
+            <div className="flex-1 relative w-full h-full min-h-0">
+                <Canvas
+                    shadows
+                    dpr={[1, 2]}
+                    camera={{ position: [15, 12, 18], fov: 40 }}
+                    gl={{ antialias: true, alpha: false }}
+                >
+                    <OrbitControls
+                        enablePan={false}
+                        maxPolarAngle={Math.PI / 2.1}
+                        minDistance={10}
+                        maxDistance={50}
+                    />
 
-                <Stars radius={500} depth={50} count={5000} factor={4} saturation={0} fade speed={1} />
+                    <Stars radius={500} depth={50} count={5000} factor={4} saturation={0} fade speed={1} />
 
-                {/* Boosted Nighttime Lighting */}
-                <ambientLight intensity={0.6} color="#b4c5ff" />
+                    {/* Boosted Nighttime Lighting */}
+                    <ambientLight intensity={0.6} color="#b4c5ff" />
 
-                {/* Massive Observer Spotlight (behind the viewer) */}
-                <spotLight
-                    position={[30, 40, 50]}
-                    angle={0.5}
-                    penumbra={0.2}
-                    intensity={2500} // MASSIVE INCREASE FOR PHYSICALLY CORRECT LIGHTING
-                    color="#ffffff"
-                    castShadow
-                    shadow-mapSize={[2048, 2048]}
-                />
+                    <spotLight
+                        position={[30, 40, 50]}
+                        angle={0.5}
+                        penumbra={0.2}
+                        intensity={2500}
+                        color="#ffffff"
+                        castShadow
+                        shadow-mapSize={[2048, 2048]}
+                    />
 
-                {/* Front-Facing Direct Fill Light */}
-                <directionalLight
-                    position={[10, 10, 20]}
-                    intensity={1.5}
-                    color="#fff"
-                />
+                    <directionalLight
+                        position={[10, 10, 20]}
+                        intensity={1.5}
+                        color="#fff"
+                    />
 
-                <Simulation onPressureChange={(pressure, isErupting) => setUiState({ pressure, isErupting })} />
-            </Canvas>
+                    <Simulation onPressureChange={(pressure, isErupting) => setUiState({ pressure, isErupting })} />
+                </Canvas>
+            </div>
 
-            {/* HUD Overlay */}
-            <div className="absolute inset-x-0 bottom-12 flex justify-center pointer-events-none">
+            {/* HUD Overlay - Responsive adjustments */}
+            <div className="absolute inset-x-0 bottom-8 lg:bottom-12 flex justify-center pointer-events-none z-20">
                 <div className="flex flex-col items-center gap-6 pointer-events-auto">
                     <div className="bg-zinc-950/80 backdrop-blur-xl border border-white/5 p-8 rounded-3xl shadow-2xl min-w-[320px]">
                         <div className="flex justify-between items-center mb-6">
