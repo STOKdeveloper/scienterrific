@@ -207,6 +207,19 @@ const Mandelbrot = () => {
         setMaxIterations(100);
     };
 
+    const jumpToLocation = (x: number, y: number, zoom: number) => {
+        setView({ x, y, zoom });
+        const zoomLog = Math.log10(zoom);
+        setMaxIterations(Math.min(1000, 100 + Math.floor(zoomLog * 150)));
+    };
+
+    const LOCATIONS = [
+        { name: 'Seahorse Valley', x: -0.745, y: 0.1, zoom: 100 },
+        { name: 'Triple Spiral', x: -0.088, y: 0.655, zoom: 5000 },
+        { name: 'Scepter Valley', x: -1.36, y: 0, zoom: 500 },
+        { name: 'Elephant Valley', x: 0.275, y: 0, zoom: 200 }
+    ];
+
     return (
         <div className="w-full h-full bg-[#050505] relative overflow-hidden flex items-center justify-center select-none">
             <div className="absolute top-24 left-8 text-left pointer-events-none z-10">
@@ -215,6 +228,20 @@ const Mandelbrot = () => {
                     <Maximize2 size={12} className="text-orange-500 animate-pulse" />
                     <p className="text-orange-500/60 text-[10px] uppercase tracking-[0.3em] font-bold">Infinite Depth Engine</p>
                 </div>
+            </div>
+
+            {/* Quick Select Locations */}
+            <div className="absolute top-48 left-8 flex flex-col gap-2 z-20">
+                <p className="text-[10px] text-white/40 font-black tracking-[0.2em] uppercase mb-1">Famous Singularities</p>
+                {LOCATIONS.map((loc) => (
+                    <button
+                        key={loc.name}
+                        onClick={() => jumpToLocation(loc.x, loc.y, loc.zoom)}
+                        className="px-4 py-2 bg-zinc-950/50 border border-orange-500/10 rounded-lg hover:border-orange-500/40 hover:bg-orange-500/5 transition-all text-left group"
+                    >
+                        <span className="text-[9px] font-bold text-white/60 group-hover:text-orange-400 uppercase tracking-widest">{loc.name}</span>
+                    </button>
+                ))}
             </div>
 
             <canvas
