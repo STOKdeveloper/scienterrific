@@ -33,12 +33,14 @@ The project is fully containerized for easy deployment.
 2. **Access:**
    Navigate to `http://localhost:8080`.
 
-### Manual Docker Build
+### Pull from GitHub Container Registry (GHCR)
 
 ```bash
-docker build -t scienterrific .
-docker run -p 8080:80 scienterrific
+docker pull ghcr.io/stokdeveloper/scienterrific:latest
+docker run -d -p 8080:80 --name scienterrific ghcr.io/stokdeveloper/scienterrific:latest
 ```
+
+### Manual Docker Build (Local)
 
 ## 💻 Development
 

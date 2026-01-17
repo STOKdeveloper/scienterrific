@@ -21,13 +21,10 @@ To run the application locally using Docker Compose:
 To run this on TrueNAS SCALE, you have a few options:
 
 ### Option 1: Using the "Launch Docker Image" feature
-1. Build the image on your local machine and push it to a registry (like Docker Hub, GitHub Packages, or a local registry).
-   ```bash
-   docker build -t yourusername/scienterrific:latest .
-   docker push yourusername/scienterrific:latest
-   ```
-2. In TrueNAS SCALE, go to **Apps** -> **Discover Apps** -> **Custom App** (or **Launch Docker Image**).
-3. Set the **Image Name** to `yourusername/scienterrific`.
+1. The image is automatically built and pushed to GitHub Container Registry (GHCR) on every push to the `main` branch.
+2. Image path: `ghcr.io/stokdeveloper/scienterrific:latest`
+3. In TrueNAS SCALE, go to **Apps** -> **Discover Apps** -> **Custom App**.
+4. Set the **Image Name** to `ghcr.io/stokdeveloper/scienterrific`.
 4. Set **Port Forwarding**:
    - Container Port: `80`
    - Host Port: `8080` (or any available port).
