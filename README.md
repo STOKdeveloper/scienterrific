@@ -13,6 +13,7 @@ An interactive scientific visualization platform built with React, Three.js, and
 - **Plate Tectonics**: Lithospheric interaction analysis of divergent, convergent, and transform boundaries.
 - **Volcanic Activity**: 3D simulation of magma buildup and interactive eruptions.
 - **The Water Cycle**: Detailed hydrologic flow analysis from evaporation to collection.
+- **Game of Life**: Conway's cellular automaton projected onto sphere, cube, and flat cross-net geometries with seamless edge-wrapping topology.
 
 ## 🛠️ Tech Stack
 
@@ -63,6 +64,18 @@ docker run -d -p 8080:80 --name scienterrific ghcr.io/stokdeveloper/scienterrifi
 - Quantum tunneling visualization
 - Fluid dynamics simulation
 - General Relativity spacetime curvature model
+
+## 📋 Changelog
+
+### v1.9.0
+- **Game of Life**: Added 3D Conway's Game of Life visualization
+  - 6-face cube-native simulation engine with topologically correct edge neighbours
+  - Three geometry projections: Sphere (cubified sphere), Cube (flat-faced), and Flat (cross-net unfold)
+  - Playback controls: play/pause, step forward/back, randomize
+  - Configurable grid density, seed sparsity, and simulation speed
+  - Depth-based Z-shading for visual occlusion
+  - Toggle empty cell visibility with backside culling
+  - Spacebar shortcut for play/pause
 
 ---
 *Created by [Your Name/Stokdeveloper]*
