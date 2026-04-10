@@ -10,6 +10,7 @@ import Doppler from "@/components/visualizations/Doppler";
 import PlateTectonics from "@/components/visualizations/PlateTectonics";
 import Volcano from "@/components/visualizations/Volcano";
 import WaterCycle from "@/components/visualizations/WaterCycle";
+import GameOfLife from "@/components/visualizations/GameOfLife";
 import { AnimatePresence, motion } from "framer-motion";
 import pkg from '../package.json';
 
@@ -27,6 +28,7 @@ function App() {
       case 'plate-tectonics': return 'PLATE TECTONICS';
       case 'volcano': return 'VOLCANIC ACTIVITY';
       case 'water-cycle': return 'THE WATER CYCLE';
+      case 'game-of-life': return 'GAME OF LIFE';
       default: return 'SCIENTERRIFIC';
     }
   };
@@ -40,6 +42,7 @@ function App() {
       case 'plate-tectonics': return 'LITHOSPHERIC INTERACTION ANALYSIS';
       case 'volcano': return 'MAGMA PRESSURE MONITORING';
       case 'water-cycle': return 'HYDROLOGIC FLOW ANALYSIS';
+      case 'game-of-life': return 'CELLULAR AUTOMATA';
       default: return 'VISUALIZATION ACTIVE';
     }
   };
@@ -69,6 +72,7 @@ function App() {
                 {currentView === 'plate-tectonics' && <PlateTectonics />}
                 {currentView === 'volcano' && <Volcano />}
                 {currentView === 'water-cycle' && <WaterCycle />}
+                {currentView === 'game-of-life' && <GameOfLife />}
               </motion.div>
             </AnimatePresence>
 
