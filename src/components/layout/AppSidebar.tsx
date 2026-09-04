@@ -9,7 +9,7 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { Orbit, SunMoon, Atom, Binary, Sigma, Activity, Mountain, Wifi, Cpu } from "lucide-react";
+import { Orbit, SunMoon, Atom, Binary, Sigma, Activity, Mountain, Wifi, Cpu, Hash } from "lucide-react";
 
 interface AppSidebarProps {
     currentView: string;
@@ -54,6 +54,11 @@ export function AppSidebar({ currentView, setCurrentView }: AppSidebarProps) {
             id: "chaos",
             icon: Sigma,
         },
+        {
+            title: "Primes",
+            id: "primes",
+            icon: Hash,
+        },
     ];
 
     const natureItems = [
@@ -83,8 +88,8 @@ export function AppSidebar({ currentView, setCurrentView }: AppSidebarProps) {
     ];
 
     return (
-        <Sidebar className="border-r border-orange-500/10 bg-zinc-900/95 backdrop-blur-xl">
-            <SidebarContent className="bg-zinc-900/40">
+        <Sidebar className="border-r border-orange-500/10 bg-zinc-900/95 backdrop-blur-xl no-scrollbar [&::-webkit-scrollbar]:hidden [scrollbar-width:none] [-ms-overflow-style:none]">
+            <SidebarContent className="bg-zinc-900/40 no-scrollbar [&::-webkit-scrollbar]:hidden [scrollbar-width:none] [-ms-overflow-style:none]">
                 <div className="p-6">
                     <h1 className="text-2xl font-black bg-gradient-to-r from-orange-400 to-orange-600 bg-clip-text text-transparent italic tracking-tighter">
                         SCIENTERRIFIC
@@ -92,7 +97,7 @@ export function AppSidebar({ currentView, setCurrentView }: AppSidebarProps) {
                 </div>
 
                 <SidebarGroup>
-                    <SidebarGroupLabel className="text-orange-500/40 uppercase tracking-[0.2em] text-[10px] px-6 mb-4 font-bold">
+                    <SidebarGroupLabel className="text-orange-500/40 uppercase tracking-[0.2em] text-[10px] px-6 h-5 mb-1 font-bold">
                         Space
                     </SidebarGroupLabel>
                     <SidebarGroupContent>
@@ -119,7 +124,7 @@ export function AppSidebar({ currentView, setCurrentView }: AppSidebarProps) {
                 </SidebarGroup>
 
                 <SidebarGroup>
-                    <SidebarGroupLabel className="text-orange-500/40 uppercase tracking-[0.2em] text-[10px] px-6 mb-4 font-bold">
+                    <SidebarGroupLabel className="text-orange-500/40 uppercase tracking-[0.2em] text-[10px] px-6 h-5 mb-1 font-bold">
                         Physics
                     </SidebarGroupLabel>
                     <SidebarGroupContent>
@@ -146,7 +151,7 @@ export function AppSidebar({ currentView, setCurrentView }: AppSidebarProps) {
                 </SidebarGroup>
 
                 <SidebarGroup>
-                    <SidebarGroupLabel className="text-orange-500/40 uppercase tracking-[0.2em] text-[10px] px-6 mb-4 font-bold">
+                    <SidebarGroupLabel className="text-orange-500/40 uppercase tracking-[0.2em] text-[10px] px-6 h-5 mb-1 font-bold">
                         Mathematics
                     </SidebarGroupLabel>
                     <SidebarGroupContent>
@@ -173,7 +178,7 @@ export function AppSidebar({ currentView, setCurrentView }: AppSidebarProps) {
                 </SidebarGroup>
 
                 <SidebarGroup>
-                    <SidebarGroupLabel className="text-orange-500/40 uppercase tracking-[0.2em] text-[10px] px-6 mb-4 font-bold">
+                    <SidebarGroupLabel className="text-orange-500/40 uppercase tracking-[0.2em] text-[10px] px-6 h-5 mb-1 font-bold">
                         Nature
                     </SidebarGroupLabel>
                     <SidebarGroupContent>
@@ -200,7 +205,7 @@ export function AppSidebar({ currentView, setCurrentView }: AppSidebarProps) {
                 </SidebarGroup>
 
                 <SidebarGroup>
-                    <SidebarGroupLabel className="text-orange-500/40 uppercase tracking-[0.2em] text-[10px] px-6 mb-4 font-bold">
+                    <SidebarGroupLabel className="text-orange-500/40 uppercase tracking-[0.2em] text-[10px] px-6 h-5 mb-1 font-bold">
                         Compute
                     </SidebarGroupLabel>
                     <SidebarGroupContent>
