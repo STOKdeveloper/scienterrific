@@ -12,6 +12,7 @@ An interactive scientific visualization platform built with React, Three.js, and
 - **Gravity & Singularity**: Theoretical model of gravitational singularities and event horizons.
 - **Three Body Problem**: Real-time analysis of chaotic orbital dynamics and three-body gravitational interactions.
 - **Doppler Effect**: Acoustic and electromagnetic wave compression and relativistic observer analysis.
+- **Waves**: Interference from 2, 3 and 4 point sources, plus a "Thumper" that dips a shape (thin line, circle, triangle, square, pentagon, hexagon, star, cross) in and out of a liquid. Adjustable dip frequency, spin rate and size; the surface is solved with the 2D wave equation.
 
 ### Mathematics
 - **Chaos Theory**: Mandelbrot set and fractal exploration with interactive box-selection zoom.
@@ -89,6 +90,13 @@ docker run -d -p 8080:80 --name scienterrific ghcr.io/stokdeveloper/scienterrifi
 - General Relativity spacetime curvature model
 
 ## 📋 Changelog
+
+### v1.11.0
+- **Waves (Physics Section)**:
+  - New page with 2, 3 and 4 point-source interference patterns (adjustable wavelength and spacing).
+  - Thumper mode: a shape enters and leaves the liquid at the centre, generating waves from a 2D wave-equation simulation.
+  - Shapes: thin line (first option), circle, triangle, square, pentagon, hexagon, star, cross.
+  - Controls for dip frequency, spin rate (either direction) and object size.
 
 ### v1.10.0
 - **Primes (Discrete Number Theory Lab - Mathematics Section)**:

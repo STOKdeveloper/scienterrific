@@ -9,7 +9,7 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { Orbit, SunMoon, Atom, Binary, Sigma, Activity, Mountain, Wifi, Cpu, Hash } from "lucide-react";
+import { Orbit, SunMoon, Atom, Binary, Sigma, Activity, Mountain, Wifi, Cpu, Hash, Waves as WavesIcon } from "lucide-react";
 
 interface AppSidebarProps {
     currentView: string;
@@ -45,6 +45,11 @@ export function AppSidebar({ currentView, setCurrentView }: AppSidebarProps) {
             title: "Doppler Effect",
             id: "doppler",
             icon: Wifi,
+        },
+        {
+            title: "Waves",
+            id: "waves",
+            icon: WavesIcon,
         },
     ];
 

@@ -12,6 +12,7 @@ import Volcano from "@/components/visualizations/Volcano";
 import WaterCycle from "@/components/visualizations/WaterCycle";
 import GameOfLife from "@/components/visualizations/GameOfLife";
 import Primes from "@/components/visualizations/Primes";
+import Waves from "@/components/visualizations/Waves";
 import { AnimatePresence, motion } from "framer-motion";
 import pkg from '../package.json';
 
@@ -31,6 +32,7 @@ function App() {
       case 'water-cycle': return 'THE WATER CYCLE';
       case 'game-of-life': return 'GAME OF LIFE';
       case 'primes': return 'PRIME CARTESIAN MATRIX';
+      case 'waves': return 'WAVES';
       default: return 'SCIENTERRIFIC';
     }
   };
@@ -46,6 +48,7 @@ function App() {
       case 'water-cycle': return 'HYDROLOGIC FLOW ANALYSIS';
       case 'game-of-life': return 'CELLULAR AUTOMATA';
       case 'primes': return 'DISCRETE NUMBER THEORY & LATTICE';
+      case 'waves': return 'INTERFERENCE & SURFACE DYNAMICS';
       default: return 'VISUALIZATION ACTIVE';
     }
   };
@@ -77,6 +80,7 @@ function App() {
                 {currentView === 'water-cycle' && <WaterCycle />}
                 {currentView === 'game-of-life' && <GameOfLife />}
                 {currentView === 'primes' && <Primes />}
+                {currentView === 'waves' && <Waves />}
               </motion.div>
             </AnimatePresence>
 
