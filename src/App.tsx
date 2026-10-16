@@ -13,6 +13,8 @@ import WaterCycle from "@/components/visualizations/WaterCycle";
 import GameOfLife from "@/components/visualizations/GameOfLife";
 import Primes from "@/components/visualizations/Primes";
 import Waves from "@/components/visualizations/Waves";
+import GravitationalLensing from "@/components/visualizations/GravitationalLensing";
+import Lorenz from "@/components/visualizations/Lorenz";
 import { AnimatePresence, motion } from "framer-motion";
 import pkg from '../package.json';
 
@@ -33,6 +35,8 @@ function App() {
       case 'game-of-life': return 'GAME OF LIFE';
       case 'primes': return 'PRIME CARTESIAN MATRIX';
       case 'waves': return 'WAVES';
+      case 'lensing': return 'GRAVITATIONAL LENSING';
+      case 'lorenz': return 'LORENZ ATTRACTOR';
       default: return 'SCIENTERRIFIC';
     }
   };
@@ -49,6 +53,8 @@ function App() {
       case 'game-of-life': return 'CELLULAR AUTOMATA';
       case 'primes': return 'DISCRETE NUMBER THEORY & LATTICE';
       case 'waves': return 'INTERFERENCE & SURFACE DYNAMICS';
+      case 'lensing': return 'SPACETIME CURVATURE & LIGHT';
+      case 'lorenz': return 'DETERMINISTIC CHAOS';
       default: return 'VISUALIZATION ACTIVE';
     }
   };
@@ -81,6 +87,8 @@ function App() {
                 {currentView === 'game-of-life' && <GameOfLife />}
                 {currentView === 'primes' && <Primes />}
                 {currentView === 'waves' && <Waves />}
+                {currentView === 'lensing' && <GravitationalLensing />}
+                {currentView === 'lorenz' && <Lorenz />}
               </motion.div>
             </AnimatePresence>
 

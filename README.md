@@ -12,10 +12,12 @@ An interactive scientific visualization platform built with React, Three.js, and
 - **Gravity & Singularity**: Theoretical model of gravitational singularities and event horizons.
 - **Three Body Problem**: Real-time analysis of chaotic orbital dynamics and three-body gravitational interactions.
 - **Doppler Effect**: Acoustic and electromagnetic wave compression and relativistic observer analysis.
-- **Waves**: Interference from 2, 3 and 4 point sources, plus a "Thumper" that dips a shape (thin line, circle, triangle, square, pentagon, hexagon, star, cross) in and out of a liquid. Adjustable dip frequency, spin rate and size; the surface is solved with the 2D wave equation.
+- **Waves**: Interference from 2, 3 and 4 point sources, plus a "Thumper" that dips a shape (thin line, circle, triangle, square, pentagon, hexagon, star, cross) in and out of a liquid. Adjustable dip frequency, spin rate and size; the surface is solved with the 2D wave equation. Also includes **Slits** (single to four-slit diffraction with a live detector profile) and **Mach Cone** (a source moving at 0.2-3x wave speed), plus an Edge Reflection toggle.
+- **Gravitational Lensing**: Ray-traced lens equation with a draggable background source, single or binary lens, Einstein ring guide and galaxy / starfield / grid backdrops.
 
 ### Mathematics
 - **Chaos Theory**: Mandelbrot set and fractal exploration with interactive box-selection zoom.
+- **Lorenz Attractor**: RK4-integrated strange attractor with adjustable σ, ρ, β, orbit camera, and two trajectories 0.0001 apart showing the butterfly effect on a live log-separation chart.
 - **Primes (Discrete Number Theory & Geometry Lab)**:
   - Interactive Cartesian coordinate plane with continuous domains up to **$\pm 1,000\text{M}$ ($1,000,000,000$ / $1\text{ Billion}$)** across all four quadrants.
   - $1$ explicitly assumed prime across all mathematical modes and calculations.
@@ -90,6 +92,11 @@ docker run -d -p 8080:80 --name scienterrific ghcr.io/stokdeveloper/scienterrifi
 - General Relativity spacetime curvature model
 
 ## 📋 Changelog
+
+### v1.12.0
+- **Waves**: new Slits mode (1-4 slits, adjustable width, separation and wavelength, with a time-averaged fringe detector) and Mach Cone mode (moving source, cone half-angle readout).
+- **Gravitational Lensing** (Physics): new page.
+- **Lorenz Attractor** (Mathematics): new page.
 
 ### v1.11.0
 - **Waves (Physics Section)**:

@@ -9,7 +9,7 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { Orbit, SunMoon, Atom, Binary, Sigma, Activity, Mountain, Wifi, Cpu, Hash, Waves as WavesIcon } from "lucide-react";
+import { Orbit, SunMoon, Atom, Binary, Sigma, Activity, Mountain, Wifi, Cpu, Hash, Waves as WavesIcon, Telescope, Wind } from "lucide-react";
 
 interface AppSidebarProps {
     currentView: string;
@@ -51,6 +51,11 @@ export function AppSidebar({ currentView, setCurrentView }: AppSidebarProps) {
             id: "waves",
             icon: WavesIcon,
         },
+        {
+            title: "Grav. Lensing",
+            id: "lensing",
+            icon: Telescope,
+        },
     ];
 
     const mathItems = [
@@ -58,6 +63,11 @@ export function AppSidebar({ currentView, setCurrentView }: AppSidebarProps) {
             title: "Chaos",
             id: "chaos",
             icon: Sigma,
+        },
+        {
+            title: "Lorenz Attractor",
+            id: "lorenz",
+            icon: Wind,
         },
         {
             title: "Primes",

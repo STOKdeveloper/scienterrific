@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Play, Pause, RotateCcw, Circle, Triangle, Square, Pentagon, Hexagon, Star, Plus, Minus } from 'lucide-react';
 
-type Mode = 'two' | 'three' | 'four' | 'thumper';
+type Mode = 'two' | 'three' | 'four' | 'thumper' | 'slits' | 'mach';
 type Shape = 'line' | 'circle' | 'triangle' | 'square' | 'pentagon' | 'hexagon' | 'star' | 'cross';
 
 const MODES: { id: Mode; label: string }[] = [
@@ -9,7 +9,12 @@ const MODES: { id: Mode; label: string }[] = [
     { id: 'three', label: '3 Sources' },
     { id: 'four', label: '4 Sources' },
     { id: 'thumper', label: 'Thumper' },
+    { id: 'slits', label: 'Slits' },
+    { id: 'mach', label: 'Mach Cone' },
 ];
+
+// Modes driven by the finite-difference wave solver (the others are analytic)
+const isSimMode = (m: Mode) => m === 'thumper' || m === 'slits' || m === 'mach';
 
 const SHAPES: { id: Shape; label: string; icon: React.ElementType }[] = [
     { id: 'line', label: 'Thin Line', icon: Minus },
@@ -77,11 +82,15 @@ const Waves: React.FC = () => {
     const [spin, setSpin] = useState(0);                   // rev/s
     const [size, setSize] = useState(100);                 // % shape size
     const [reflect, setReflect] = useState(false);         // reflection from the edges
+    const [slitCount, setSlitCount] = useState(2);          // number of slits in the barrier
+    const [slitWidth, setSlitWidth] = useState(6);          // cells
+    const [slitGap, setSlitGap] = useState(30);             // centre-to-centre, cells
+    const [mach, setMach] = useState(1.5);                  // source speed / wave speed
     const [resetKey, setResetKey] = useState(0);
 
     // Live parameters read by the animation loop (avoids restarting it on every slider move)
-    const params = useRef({ mode, shape, playing, wavelength, spacing, thumpFreq, spin, size, reflect });
-    params.current = { mode, shape, playing, wavelength, spacing, thumpFreq, spin, size, reflect };
+    const params = useRef({ mode, shape, playing, wavelength, spacing, thumpFreq, spin, size, reflect, slitCount, slitWidth, slitGap, mach });
+    params.current = { mode, shape, playing, wavelength, spacing, thumpFreq, spin, size, reflect, slitCount, slitWidth, slitGap, mach };
 
     useEffect(() => {
         const canvas = canvasRef.current;
@@ -100,6 +109,10 @@ const Waves: React.FC = () => {
         let simTime = 0;     // seconds of simulated time
         let phase = 0;       // thumper phase (rad)
         let angle = 0;       // thumper rotation (rad)
+        let wall = new Uint8Array(0);       // rigid barrier cells (slits mode)
+        let wallKey = '';
+        let avgI = new Float32Array(0);     // time-averaged intensity on the detector column
+        let srcX = 0;                       // moving source position (mach mode)
         let lastMode: Mode = params.current.mode;
         let lastShape: Shape = params.current.shape;
 
@@ -116,6 +129,10 @@ const Waves: React.FC = () => {
             p = new Float32Array(gw * gh);
             n = new Float32Array(gw * gh);
             damp = new Float32Array(gw * gh);
+            wall = new Uint8Array(gw * gh);
+            wallKey = '';
+            avgI = new Float32Array(gh);
+            srcX = gw * 0.2;
             for (let y = 0; y < gh; y++) {
                 for (let x = 0; x < gw; x++) {
                     const d = Math.min(x, y, gw - 1 - x, gh - 1 - y);
@@ -183,11 +200,36 @@ const Waves: React.FC = () => {
             offCtx.putImageData(img, 0, 0);
         };
 
-        // ---------- Thumper (finite-difference 2D wave equation with a moving boundary)
-        const stepThumper = () => {
-            const { thumpFreq: f, spin: sr, shape: sh } = params.current;
-            phase += (2 * Math.PI * f) / STEPS_PER_SEC;
-            angle += (2 * Math.PI * sr) / STEPS_PER_SEC;
+        // ---------- Wave sandbox (Thumper / Slits / Mach cone): finite-difference 2D wave equation
+        const buildWalls = (m: Mode) => {
+            const { slitCount: count, slitWidth: w, slitGap: gap } = params.current;
+            const key = m === 'slits' ? `${gw}x${gh}:${count}:${w}:${gap}` : 'none';
+            if (key === wallKey) return;
+            wallKey = key;
+            wall.fill(0);
+            if (m !== 'slits') return;
+            const wx = Math.round(gw * 0.38);
+            for (let y = 0; y < gh; y++) {
+                let open = false;
+                for (let s = 0; s < count; s++) {
+                    const cy = gh / 2 + (s - (count - 1) / 2) * gap;
+                    if (Math.abs(y - cy) <= w / 2) open = true;
+                }
+                if (open) continue;
+                for (let x = wx; x < wx + 3; x++) wall[y * gw + x] = 1;
+            }
+        };
+
+        const stepSim = () => {
+            const { thumpFreq: f, spin: sr, shape: sh, mode: m, wavelength: lam, mach: M } = params.current;
+            buildWalls(m);
+            if (m === 'thumper') {
+                phase += (2 * Math.PI * f) / STEPS_PER_SEC;
+                angle += (2 * Math.PI * sr) / STEPS_PER_SEC;
+            } else {
+                // One wavelength of phase per 'lam' cells travelled at the wave speed
+                phase += (2 * Math.PI * WAVE_C) / lam;
+            }
 
             const refl = params.current.reflect;
             const c2 = WAVE_C * WAVE_C;
@@ -195,7 +237,7 @@ const Waves: React.FC = () => {
                 for (let x = 1; x < gw - 1; x++) {
                     const i = y * gw + x;
                     const lap = u[i - 1] + u[i + 1] + u[i - gw] + u[i + gw] - 4 * u[i];
-                    n[i] = (2 * u[i] - p[i] + c2 * lap) * (refl ? 1 : damp[i]) * 0.9998;
+                    n[i] = wall[i] ? 0 : (2 * u[i] - p[i] + c2 * lap) * (refl ? 1 : damp[i]) * 0.9998;
                 }
             }
             if (refl) {
@@ -212,7 +254,7 @@ const Waves: React.FC = () => {
             const t = p; p = u; u = n; n = t;
 
             // Depth the object is pushed below the surface (0 when it is out of the liquid)
-            const depth = Math.max(0, -Math.sin(phase));
+            const depth = m === 'thumper' ? Math.max(0, -Math.sin(phase)) : 0;
             if (depth > 0) {
                 const R = shapeRadius();
                 const cx = gw / 2, cy = gh / 2;
@@ -228,10 +270,40 @@ const Waves: React.FC = () => {
                     }
                 }
             }
+
+            if (m === 'slits') {
+                // Plane-wave source: a soft line source down the left side
+                const s = 0.3 * Math.sin(phase);
+                const xs = SPONGE + 4;
+                for (let y = SPONGE; y < gh - SPONGE; y++) u[y * gw + xs] += s;
+                // Time-averaged intensity on a detector column (interference fringes)
+                const xd = gw - SPONGE - 2;
+                for (let y = 0; y < gh; y++) {
+                    const v = u[y * gw + xd];
+                    avgI[y] += (v * v - avgI[y]) * 0.004;
+                }
+            } else if (m === 'mach') {
+                // Point source moving at M x the wave speed; deposit along the path travelled this step
+                const x0 = srcX, x1 = srcX + M * WAVE_C;
+                const cyc = Math.round(gh / 2);
+                const samples = Math.max(1, Math.ceil(Math.abs(x1 - x0)));
+                for (let k = 1; k <= samples; k++) {
+                    const xi = Math.round(x0 + ((x1 - x0) * k) / samples);
+                    if (xi > 1 && xi < gw - 2) u[cyc * gw + xi] += (0.7 * Math.sin(phase)) / samples;
+                }
+                srcX = x1;
+                if (srcX > gw - SPONGE - 6) { srcX = SPONGE + 6; u.fill(0); p.fill(0); }
+            }
         };
 
-        const drawThumper = () => {
-            for (let i = 0; i < gw * gh; i++) colour(u[i] * 1.8, i * 4);
+        const drawSim = () => {
+            for (let i = 0; i < gw * gh; i++) {
+                colour(u[i] * 1.8, i * 4);
+                if (wall[i]) {
+                    const o = i * 4;
+                    img.data[o] = 120; img.data[o + 1] = 130; img.data[o + 2] = 150;
+                }
+            }
             offCtx.putImageData(img, 0, 0);
         };
 
@@ -267,6 +339,37 @@ const Waves: React.FC = () => {
                 ctx.shadowBlur = 12;
                 ctx.stroke();
                 ctx.restore();
+            } else if (m === 'slits') {
+                const xs = SPONGE + 4, xd = gw - SPONGE - 2;
+                ctx.strokeStyle = 'rgba(249,115,22,0.8)';
+                ctx.lineWidth = 0.8;
+                ctx.beginPath();
+                ctx.moveTo(xs, SPONGE);
+                ctx.lineTo(xs, gh - SPONGE);
+                ctx.stroke();
+                // Detector profile: bright fringes = constructive interference
+                let mx = 1e-6;
+                for (let y = 0; y < gh; y++) mx = Math.max(mx, avgI[y]);
+                ctx.beginPath();
+                ctx.moveTo(xd, 0);
+                for (let y = 0; y < gh; y++) ctx.lineTo(xd + (avgI[y] / mx) * (SPONGE - 4), y);
+                ctx.lineTo(xd, gh);
+                ctx.closePath();
+                ctx.fillStyle = 'rgba(249,115,22,0.35)';
+                ctx.fill();
+                ctx.strokeStyle = 'rgba(251,146,60,0.9)';
+                ctx.lineWidth = 0.6;
+                ctx.stroke();
+            } else if (m === 'mach') {
+                ctx.beginPath();
+                ctx.arc(srcX, gh / 2, 2.2, 0, Math.PI * 2);
+                ctx.fillStyle = '#f97316';
+                ctx.shadowColor = 'rgba(249,115,22,0.9)';
+                ctx.shadowBlur = 14;
+                ctx.fill();
+                ctx.lineWidth = 0.5;
+                ctx.strokeStyle = 'white';
+                ctx.stroke();
             } else {
                 srcsForOverlay(m).forEach(([x, y]) => {
                     ctx.beginPath();
@@ -298,17 +401,17 @@ const Waves: React.FC = () => {
             const { mode: m, shape: sh, playing: pl } = params.current;
 
             if (m !== lastMode || sh !== lastShape) {
-                if (m === 'thumper' || lastMode === 'thumper') {
-                    u.fill(0); p.fill(0); n.fill(0); phase = 0; angle = 0;
+                if ((m !== lastMode && (isSimMode(m) || isSimMode(lastMode))) || (m === 'thumper' && sh !== lastShape)) {
+                    u.fill(0); p.fill(0); n.fill(0); phase = 0; angle = 0; avgI.fill(0); srcX = gw * 0.2;
                 }
                 lastMode = m; lastShape = sh;
             }
 
             if (pl) {
                 simTime += dt;
-                if (m === 'thumper') for (let s = 0; s < STEPS_PER_FRAME; s++) stepThumper();
+                if (isSimMode(m)) for (let s = 0; s < STEPS_PER_FRAME; s++) stepSim();
             }
-            if (m === 'thumper') drawThumper(); else drawInterference(m);
+            if (isSimMode(m)) drawSim(); else drawInterference(m);
             render();
             raf = requestAnimationFrame(loop);
         };
@@ -321,6 +424,8 @@ const Waves: React.FC = () => {
     }, [resetKey]);
 
     const isThumper = mode === 'thumper';
+    const isSlits = mode === 'slits';
+    const isMach = mode === 'mach';
 
     const Slider: React.FC<{
         label: string; value: number; min: number; max: number; step: number;
@@ -380,6 +485,23 @@ const Waves: React.FC = () => {
                                 <Slider label="Spin Rate" value={spin} min={-2} max={2} step={0.05} unit=" rev/s" onChange={setSpin} />
                                 <Slider label="Object Size" value={size} min={40} max={200} step={5} unit="%" onChange={setSize} />
                             </>
+                        ) : isSlits ? (
+                            <>
+                                <Slider label="Slits" value={slitCount} min={1} max={4} step={1} unit="" onChange={setSlitCount} />
+                                <Slider label="Slit Width" value={slitWidth} min={2} max={24} step={1} unit="" onChange={setSlitWidth} />
+                                <Slider label="Slit Separation" value={slitGap} min={10} max={60} step={1} unit="" onChange={setSlitGap} />
+                                <Slider label="Wavelength" value={wavelength} min={10} max={50} step={1} unit="" onChange={setWavelength} />
+                            </>
+                        ) : isMach ? (
+                            <>
+                                <Slider label="Source Speed (Mach)" value={mach} min={0.2} max={3} step={0.05} unit="" onChange={setMach} />
+                                <Slider label="Wavelength" value={wavelength} min={10} max={50} step={1} unit="" onChange={setWavelength} />
+                                <p className="text-[10px] font-mono text-orange-400/80">
+                                    {mach > 1
+                                        ? `Mach cone half-angle: ${(Math.asin(1 / mach) * 180 / Math.PI).toFixed(1)}°`
+                                        : mach === 1 ? 'Sound barrier: waves pile up ahead' : 'Subsonic: no cone forms'}
+                                </p>
+                            </>
                         ) : (
                             <>
                                 <Slider label="Wavelength" value={wavelength} min={10} max={50} step={1} unit="" onChange={setWavelength} />
@@ -430,6 +552,21 @@ const Waves: React.FC = () => {
                         A prism of the chosen shape dips in and out of the liquid. The surface is solved with the 2D wave
                         equation, so the outgoing wavefront follows the object's footprint, and spinning it sweeps
                         its corners through the water. A circle has no corners, so spin makes no difference.
+                    </p>
+                </div>
+                <div className="p-6 rounded-2xl border border-white/5 bg-zinc-900/10">
+                    <h3 className="text-orange-500 text-[10px] font-black uppercase tracking-[0.2em] mb-2">Slits</h3>
+                    <p className="text-white/80 text-xs font-medium leading-relaxed">
+                        A plane wave meets a rigid barrier with 1–4 slits. Each slit re-radiates a circular wave (Huygens),
+                        and the overlap builds fringes at the detector on the right. Fringe spacing grows with wavelength and
+                        shrinks as the slit separation increases; narrower slits spread the pattern wider.
+                    </p>
+                </div>
+                <div className="p-6 rounded-2xl border border-white/5 bg-zinc-900/10">
+                    <h3 className="text-blue-500 text-[10px] font-black uppercase tracking-[0.2em] mb-2">Mach Cone</h3>
+                    <p className="text-white/80 text-xs font-medium leading-relaxed">
+                        A moving source emits waves at the speed set by the medium. Above Mach 1 it outruns its own wavefronts,
+                        which pile into a cone with half-angle sin⁻¹(1/M): the 2D analogue of a sonic boom or boat wake.
                     </p>
                 </div>
             </div>
