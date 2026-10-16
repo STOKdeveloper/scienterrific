@@ -7,13 +7,13 @@ An interactive scientific visualization platform built with React, Three.js, and
 ### Space & Astronomy
 - **The Solar System**: Real-time 3D orbital simulation of our planetary system.
 - **Earth: Day & Night**: Visualization of Earth's rotation and light/shadow dynamics.
+- **Gravitational Lensing**: Ray-traced lens equation with a draggable background source, single or binary lens, Einstein ring guide and galaxy / starfield / grid backdrops.
 
 ### Physics & Mechanics
 - **Gravity & Singularity**: Theoretical model of gravitational singularities and event horizons.
 - **Three Body Problem**: Real-time analysis of chaotic orbital dynamics and three-body gravitational interactions.
 - **Doppler Effect**: Acoustic and electromagnetic wave compression and relativistic observer analysis.
 - **Waves**: Interference from 2, 3 and 4 point sources, plus a "Thumper" that dips a shape (thin line, circle, triangle, square, pentagon, hexagon, star, cross) in and out of a liquid. Adjustable dip frequency, spin rate and size; the surface is solved with the 2D wave equation. Also includes **Slits** (single to four-slit diffraction with a live detector profile) and **Mach Cone** (a source moving at 0.2-3x wave speed), plus an Edge Reflection toggle.
-- **Gravitational Lensing**: Ray-traced lens equation with a draggable background source, single or binary lens, Einstein ring guide and galaxy / starfield / grid backdrops.
 
 ### Mathematics
 - **Chaos Theory**: Mandelbrot set and fractal exploration with interactive box-selection zoom.
@@ -93,9 +93,12 @@ docker run -d -p 8080:80 --name scienterrific ghcr.io/stokdeveloper/scienterrifi
 
 ## 📋 Changelog
 
+### v1.12.1
+- **Sidebar & Organization**: Moved Gravitational Lensing to the Space & Astronomy section.
+
 ### v1.12.0
 - **Waves**: new Slits mode (1-4 slits, adjustable width, separation and wavelength, with a time-averaged fringe detector) and Mach Cone mode (moving source, cone half-angle readout).
-- **Gravitational Lensing** (Physics): new page.
+- **Gravitational Lensing** (Space): new page.
 - **Lorenz Attractor** (Mathematics): new page.
 
 ### v1.11.0

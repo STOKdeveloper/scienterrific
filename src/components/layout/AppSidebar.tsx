@@ -28,6 +28,11 @@ export function AppSidebar({ currentView, setCurrentView }: AppSidebarProps) {
             id: "day-night",
             icon: SunMoon,
         },
+        {
+            title: "Grav. Lensing",
+            id: "lensing",
+            icon: Telescope,
+        },
     ];
 
     const conceptItems = [
@@ -50,11 +55,6 @@ export function AppSidebar({ currentView, setCurrentView }: AppSidebarProps) {
             title: "Waves",
             id: "waves",
             icon: WavesIcon,
-        },
-        {
-            title: "Grav. Lensing",
-            id: "lensing",
-            icon: Telescope,
         },
     ];
 
