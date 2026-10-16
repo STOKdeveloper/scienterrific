@@ -11,6 +11,15 @@ interface Particle {
     color: string;
 }
 
+// ---- Shared physics helpers (single source of truth for force law and orbital speed)
+const SOFTENING = 2;                       // keeps the force finite near r = 0
+const gmOf = (depth: number) => depth * 80;
+const accelMag = (gm: number, r: number) => gm / (r * r + SOFTENING);
+// Speed needed for a circular orbit under the exact force law above: v^2 / r = a(r)
+const circularSpeed = (gm: number, r: number) => Math.sqrt(accelMag(gm, r) * r);
+const DRAG_PER_SEC = 0.004;                 // very weak, mass-dependent orbital decay (per second)
+const MAX_SUBSTEP = 0.01;                   // seconds
+
 const SpacetimeFabric = ({ depth, radius }: { depth: number, radius: number }) => {
     const circles = 20;
     const radialLines = 36;
@@ -77,52 +86,51 @@ const Mass = ({ particle, depth, onEnterCenter, onLeaveSimulation }: { particle:
     useFrame((state, delta) => {
         if (!meshRef.current) return;
 
-        // Use a smaller fixed time step for physics stability if delta is too large
         const dt = Math.min(delta, 0.05);
+        const gm = gmOf(depth);
+        const p = particle.position;
+        const v = particle.velocity;
 
-        const pos = particle.position;
-        const r = Math.sqrt(pos.x * pos.x + pos.z * pos.z);
+        const accelAt = (x: number, z: number) => {
+            const r = Math.sqrt(x * x + z * z);
+            if (r < 1e-6) return [0, 0] as const;
+            const a = accelMag(gm, r);
+            return [(-x / r) * a, (-z / r) * a] as const;
+        };
 
-        // Capture at singularity
-        if (r < 0.6) {
-            onEnterCenter(particle.id);
-            return;
+        // Velocity-Verlet (symplectic) with substeps: conserves energy so orbits don't spiral in artificially
+        const steps = Math.max(1, Math.ceil(dt / MAX_SUBSTEP));
+        const h = dt / steps;
+        for (let s = 0; s < steps; s++) {
+            const [ax, az] = accelAt(p.x, p.z);
+            v.x += 0.5 * h * ax;
+            v.z += 0.5 * h * az;
+            p.x += h * v.x;
+            p.z += h * v.z;
+            const [bx, bz] = accelAt(p.x, p.z);
+            v.x += 0.5 * h * bx;
+            v.z += 0.5 * h * bz;
+
+            const r = Math.sqrt(p.x * p.x + p.z * p.z);
+            if (r < 1.2) {
+                onEnterCenter(particle.id);
+                return;
+            }
+            if (r > 60) {
+                onLeaveSimulation(particle.id);
+                return;
+            }
         }
 
-        // Boundary check
-        if (r > 60) {
-            onLeaveSimulation(particle.id);
-            return;
-        }
+        // Gentle, frame-rate independent drag; heavier bodies lose energy more slowly
+        const decay = Math.exp((-DRAG_PER_SEC / particle.mass) * dt);
+        v.x *= decay;
+        v.z *= decay;
 
-        // Gravity Force: F = GM / r^2
-        const GM = depth * 80; // Balanced scaling
-        const forceMagnitude = GM / (r * r + 2);
-        const directionToCenter = new THREE.Vector3(-pos.x, 0, -pos.z).normalize();
+        const newR = Math.sqrt(p.x * p.x + p.z * p.z);
+        p.y = -depth * (5 / (newR + 1.5));
 
-        const acceleration = directionToCenter.multiplyScalar(forceMagnitude);
-
-        // Update velocity
-        particle.velocity.add(acceleration.multiplyScalar(dt));
-
-        // Mass-dependent drag: Larger masses have more momentum and lose speed slower.
-        // Electron (0.3) will decay faster than Star (1.4)
-        const frictionBase = 0.996;
-        const massEffect = 1 / particle.mass;
-        particle.velocity.multiplyScalar(Math.pow(frictionBase, massEffect));
-
-        // Update position (balanced for controlled descent)
-        particle.position.add(particle.velocity.clone().multiplyScalar(dt * 4.2));
-
-        // Sink capture check (increased radius to ensure it's caught)
-        const newR = Math.sqrt(particle.position.x ** 2 + particle.position.z ** 2);
-        if (newR < 1.2) {
-            onEnterCenter(particle.id);
-            return;
-        }
-        particle.position.y = -depth * (5 / (newR + 1.5));
-
-        meshRef.current.position.copy(particle.position);
+        meshRef.current.position.copy(p);
     });
 
     return (
@@ -152,8 +160,8 @@ const Gravity = () => {
             const x = Math.cos(seed.angle) * seed.r;
             const z = Math.sin(seed.angle) * seed.r;
 
-            const GM = depth * 80;
-            const orbitSpeed = Math.sqrt(GM / seed.r) * 1.0;
+            const GM = gmOf(depth);
+            const orbitSpeed = circularSpeed(GM, seed.r);
 
             const vx = -Math.sin(seed.angle) * orbitSpeed;
             const vz = Math.cos(seed.angle) * orbitSpeed;
@@ -177,15 +185,14 @@ const Gravity = () => {
         const x = Math.cos(angle) * rStart;
         const z = Math.sin(angle) * rStart;
 
-        // Calculate circular orbit speed for this radius: v = sqrt(GM / r)
-        // We scale GM same as in the physics loop
-        const GM = depth * 80;
-        const orbitSpeed = Math.sqrt(GM / rStart) * velocityFactor;
+        // Launch speed is a fraction of the circular-orbit speed at this radius:
+        // <1 gives an elliptical orbit that dips closer in, 1 is circular, >~1.41 escapes.
+        const GM = gmOf(depth);
+        const orbitSpeed = circularSpeed(GM, rStart) * velocityFactor;
 
-        // Initial velocity: Tangential + controlled inward component
-        const inwardSpeed = orbitSpeed * 0.35;
-        const vx = -Math.sin(angle) * orbitSpeed - Math.cos(angle) * inwardSpeed;
-        const vz = Math.cos(angle) * orbitSpeed - Math.sin(angle) * inwardSpeed;
+        // Purely tangential launch
+        const vx = -Math.sin(angle) * orbitSpeed;
+        const vz = Math.cos(angle) * orbitSpeed;
 
         const newParticle: Particle = {
             id: nextId.current++,
